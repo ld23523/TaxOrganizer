@@ -5,9 +5,9 @@
     <input type="text" v-model="username" placeholder="Type your username" />
     <p>Password</p>
     <input type="password" v-model="password" placeholder="Type your password" />
-    
+
     <button @click="handleAuth">{{ isLogin ? 'Login' : 'Register' }}</button>
-    
+
     <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
     <p v-if="successMessage" style="color: green;">{{ successMessage }}</p>
 
@@ -17,79 +17,76 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
-export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      isLogin: true,
-      errorMessage: '',
-      successMessage: ''
-    };
-  },
-  methods: {
-    toggleForm() {
-      this.isLogin = !this.isLogin;
-      this.errorMessage = '';
-      this.successMessage = '';
-    },
+const router = useRouter();
 
-    async register() {
-      try {
-        const response = await fetch('http://localhost:3000/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: this.username, password: this.password })
-        });
-        const data = await response.json();
+const username = ref('');
+const password = ref('');
+const isLogin = ref(true);
+const errorMessage = ref('');
+const successMessage = ref('');
 
-        if (data.success) {
-          this.successMessage = data.message || 'Registration successful!';
-          this.errorMessage = '';
-        } else {
-          this.errorMessage = data.message || 'Registration failed.';
-          this.successMessage = '';
-        }
-      } catch (err) {
-        this.errorMessage = 'Something went wrong during registration.';
-        this.successMessage = '';
-      }
-    },
+const toggleForm = () => {
+  isLogin.value = !isLogin.value;
+  errorMessage.value = '';
+  successMessage.value = '';
+};
 
-    async login() {
-      try {
-        const response = await fetch('http://localhost:3000/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: this.username, password: this.password })
-        });
-        const data = await response.json();
+const register = async () => {
+  try {
+    const { data } = await axios.post('http://localhost:3000/register', {
+      username: username.value,
+      password: password.value
+    });
 
-        if (data.success) {
-          this.successMessage = data.message || 'Login successful!';
-          this.errorMessage = '';
-        } else {
-          this.errorMessage = data.message || 'Login failed.';
-          this.successMessage = '';
-        }
-      } catch (err) {
-        this.errorMessage = 'Something went wrong during login.';
-        this.successMessage = '';
-      }
-    },
-
-    handleAuth() {
-      if (this.isLogin) {
-        this.login();
-      } else {
-        this.register();
-      }
+    if (data.success) {
+      successMessage.value = data.message || 'Registration successful!';
+      errorMessage.value = '';
+    } else {
+      errorMessage.value = data.message || 'Registration failed.';
+      successMessage.value = '';
     }
+  } catch (err) {
+    errorMessage.value = 'Something went wrong during registration.';
+    successMessage.value = '';
   }
 };
+
+const login = async () => {
+  try {
+    const { data } = await axios.post('http://localhost:3000/login', {
+      username: username.value,
+      password: password.value
+    });
+
+    if (data.success) {
+      successMessage.value = data.message || 'Login successful!';
+      errorMessage.value = '';
+      gowebsite();
+    } else {
+      errorMessage.value = data.message || 'Login failed.';
+      successMessage.value = '';
+    }
+  } catch (err) {
+    errorMessage.value = 'Something went wrong during login.';
+    successMessage.value = '';
+  }
+};
+
+const handleAuth = () => {
+  isLogin.value ? login() : register();
+};
+
+const gowebsite = () => {
+  alert('Login successful! Redirecting to main page...');
+  router.push('/mainPage');
+};
 </script>
+
 
 <style>
 .input-form {
