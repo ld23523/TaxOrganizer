@@ -16,11 +16,13 @@ import loginPage from './components/loginPage.vue'
 <style scoped>
 .logo {
   display: flex;
+  justify-content: center;
+  align-items: center;
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
-  margin-left: 135px;
+  
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
