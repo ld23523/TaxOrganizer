@@ -1,12 +1,14 @@
 <template>
+  
   <div class="input-form">
     <h2>{{ isLogin ? 'Login' : 'Register' }}</h2>
     <p>Username</p>
     <input type="text" v-model="username" placeholder="Type your username" />
     <p>Password</p>
     <input type="password" v-model="password" placeholder="Type your password" />
-
-    <button @click="handleAuth">{{ isLogin ? 'Login' : 'Register' }}</button>
+    <button @click="handleAuth">
+      <span style="margin-right: 8px;">🎵</span>{{ isLogin ? 'Login' : 'Register' }}
+    </button>
 
     <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
     <p v-if="successMessage" style="color: green;">{{ successMessage }}</p>
@@ -90,6 +92,7 @@ const gowebsite = () => {
 
 <style>
 .input-form {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -97,10 +100,27 @@ const gowebsite = () => {
   width: 300px;
   margin: 50px auto;
   padding: 20px;
-  border: 2px solid #ccc;
   border-radius: 10px;
   background-color: #f9f9f9;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Animated glowing border */
+.input-form::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(90deg, rgb(197, 197, 235), rgb(100, 236, 236), rgb(57, 57, 115));
+  border-radius: 12px;
+  z-index: -1;
+  animation: formBorderRun 4s linear infinite;
+  background-size: 300% 100%;
+  filter: blur(4px);
 }
 
 .input-form h2 {
@@ -126,19 +146,24 @@ const gowebsite = () => {
 }
 
 .input-form button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  background-color: #4CAF50;
+  padding: 12px 24px;
+  margin-top: 15px;
+  background: linear-gradient(135deg, #6a11cb, #2575fc); /* gradient effect */
   color: white;
+  font-weight: bold;
+  font-size: 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 50px; /* pill shape */
   width: 100%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .input-form button:hover {
-  background-color: #45a049;
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .input-form p[style*="cursor: pointer"] {
