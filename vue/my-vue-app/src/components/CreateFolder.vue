@@ -13,7 +13,6 @@
       <label>
         Category:
         <select v-model="category">
-          <option value="General">General</option>
           <option value="videos">Videos</option>
           <option value="audio">Audio</option>
           <option value="gallery">Gallery</option>

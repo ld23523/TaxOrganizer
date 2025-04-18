@@ -5,13 +5,19 @@ import FileUpload from './FileUpload.vue';
 import CreateFolder from './CreateFolder.vue';
 import Search from './Search.vue';
 import MediaItem from './MediaItem.vue';
+import Contact from "./contact.vue";
 
 
 
 const showSidebar = ref(true);
 const showDropdown = ref(false);
 const popupType = ref('');
+const selectedSection = ref('home'); // Default selected section
 
+const handleClick = (section) => {
+  
+  selectedSection.value = section;
+};
 function toggleSidebar() {
   showSidebar.value = !showSidebar.value
 }
@@ -141,6 +147,7 @@ onMounted(() => {
 </script>
 
 <template>
+
   <div class="app-container">
     <!-- Toggle Button -->
     <button @click="toggleSidebar" class="toggle-button">☰</button>
@@ -160,13 +167,13 @@ onMounted(() => {
 
       <ul>
         
-        <li><a href="#home">🏠 Home</a></li>
-        <li><a href="#All">All</a></li>
-        <li><a href="#videos">📼 Videos</a></li>
-        <li><a href="#audio">🎧 Audio</a></li>
-        <li><a href="#gallery">🖼️ Gallery</a></li>
-        <li><a href="#contact">📬 Contact</a></li>
-      </ul>
+          <li><a @click.prevent="handleClick('home')">🏠 Home</a></li>
+          <li><a @click.prevent="handleClick('videos')">📼 Videos</a></li>
+          <li><a @click.prevent="handleClick('audio')">🎧 Audio</a></li>
+          <li><a @click.prevent="handleClick('gallery')">🖼️ Gallery</a></li>
+          <li><a @click.prevent="handleClick('contact')">📬 Contact</a></li>
+    </ul>
+
     </div>
 
     <!-- Main Content -->
@@ -187,6 +194,7 @@ onMounted(() => {
             <option value="clicks">Clicks/Views</option>
           </select>
         </div>
+       
       </header>
 
       <!-- Pop-Up UI -->
@@ -200,19 +208,26 @@ onMounted(() => {
       </div>
       <router-view />
       
-      <h1>Media Manager</h1>
+      
+      
+      <!--Contact Section-->
+      <div v-if="selectedSection === 'contact'">
+          <Contact :visible="true" />
+      </div>
 
       <!-- Media grid -->
-      <div class="media-grid">
-        <MediaItem
-          v-for="(item, index) in mediaItems"
-          :key="index"
-          :name="item.name"
-          :icon="item.icon"
-          :date="new Date(item.date)"
-          :category="item.category"
-          @click="openMediaDetails(item)"
-        />
+      <div v-if="selectedSection === 'home'" class="media-grid">
+        <h1>Media Manager</h1>
+          <MediaItem
+            :visible ="true"
+            v-for="(item, index) in mediaItems"
+            :key="index"
+            :name="item.name"
+            :icon="item.icon"
+            :date="new Date(item.date)"
+            :category="item.category"
+            @click="openMediaDetails(item)"
+          />
       </div>
 
       <!-- Media Details Pop-Up -->
@@ -258,7 +273,6 @@ onMounted(() => {
               <label>
                 Category:
                 <select v-model="selectedMedia.category">
-                  <option value="General">General</option>
                   <option value="videos">Videos</option>
                   <option value="audio">Audio</option>
                   <option value="gallery">Gallery</option>
@@ -284,7 +298,10 @@ onMounted(() => {
 
     </div>
   </div>
-</template>
+
+
+
+ </template>
 
 <style scoped>
 .header {
