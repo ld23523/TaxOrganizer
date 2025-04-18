@@ -6,6 +6,7 @@ import CreateFolder from './CreateFolder.vue';
 import Search from './Search.vue';
 import MediaItem from './MediaItem.vue';
 import Contact from "./contact.vue";
+import ChatBot from './chatBot.vue';
 
 
 
@@ -173,6 +174,7 @@ onMounted(() => {
           <li><a @click.prevent="handleClick('document')">📝 Document</a></li>
           <li><a @click.prevent="handleClick('gallery')">🖼️ Gallery</a></li>
           <li><a @click.prevent="handleClick('contact')">📬 Contact</a></li>
+
     </ul>
 
     </div>
@@ -198,31 +200,33 @@ onMounted(() => {
        
       </header>
 
-      <!-- Pop-Up UI -->
-      <div v-if="popupType === 'upload'" class="popup">
+    <!-- Upload Popup -->
+    <div v-if="popupType === 'upload'" class="popup">
+      <div class ="popup-content">
         <FileUpload @file-uploaded="fetchMediaItems"/>
-        <button @click="closePopup">Close</button>
+        <button class="close-button" @click="closePopup">Close</button>
       </div>
-      <div v-if="popupType === 'createFolder'" class="popup">
+    </div>
+
+    <!-- Create Folder Popup -->
+    <div v-if="popupType === 'createFolder'" class="popup">
         <CreateFolder @folder-created="fetchMediaItems"/>
-        <button @click="closePopup">Close</button>
-      </div>
+        <button class="close-button" @click="closePopup">Close</button>
+    </div>
+
       <router-view />
       
       
       
-      <!--Contact Section-->
-      <div v-if="selectedSection === 'contact'">
-          <Contact :visible="true" />
-      </div>
+      
 
-      <!-- Media grid -->
+      <!-- Media grid (Home Section)-->
       <div v-if="selectedSection === 'home'" class="media-grid">
         <h1>Media Manager</h1>
           <MediaItem
-            :visible ="true"
             v-for="(item, index) in mediaItems"
             :key="index"
+            :visible ="true"
             :name="item.name"
             :icon="item.icon"
             :date="new Date(item.date)"
@@ -230,6 +234,70 @@ onMounted(() => {
             @click="openMediaDetails(item)"
           />
       </div>
+      <!--Videos Section-->
+      <div v-if="selectedSection === 'videos'">
+        <h1>Videos</h1>
+        <MediaItem
+          :visible ="true"
+          v-for="(item, index) in mediaItems.filter(media => media.category === 'videos')"
+          :key="index"
+          :name="item.name"
+          :icon="item.icon"
+          :date="new Date(item.date)"
+          :category="item.category"
+          @click="openMediaDetails(item)"
+        />
+      </div>
+      <!--Audio Section-->
+      <div v-if="selectedSection === 'audio'">
+        <h1>Audio</h1>
+        <MediaItem
+          :visible ="true"
+          v-for="(item, index) in mediaItems.filter(media => media.category === 'audio')"
+          :key="index"
+          :name="item.name"
+          :icon="item.icon"
+          :date="new Date(item.date)"
+          :category="item.category"
+          @click="openMediaDetails(item)"
+        />
+      </div>
+      <ChatBot 
+          :visible="true" />
+      <!--Documents Section-->    
+      <div v-if="selectedSection === 'document'">
+        <h1>Documents</h1>
+        <MediaItem
+          :visible ="true"
+          v-for="(item, index) in mediaItems.filter(media => media.category === 'documents')"
+          :key="index"
+          :name="item.name"
+          :icon="item.icon"
+          :date="new Date(item.date)"
+          :category="item.category"
+          @click="openMediaDetails(item)"
+        />
+      </div>
+      <!--Gallery Section--> 
+      <div v-if="selectedSection === 'gallery'">
+        <h1>Audio</h1>
+        <MediaItem
+          :visible ="true"
+          v-for="(item, index) in mediaItems.filter(media => media.category === 'gallery')"
+          :key="index"
+          :name="item.name"
+          :icon="item.icon"
+          :date="new Date(item.date)"
+          :category="item.category"
+          @click="openMediaDetails(item)"
+        />
+      </div>
+      <!--Contact Section-->
+      <div v-if="selectedSection === 'contact'">
+          <Contact :visible="true" />
+      </div>
+
+      
 
       <!-- Media Details Pop-Up -->
       <div v-if="selectedMedia" class="media-display">
@@ -610,4 +678,18 @@ onMounted(() => {
 .sidebar.open + .main-content {
   margin-left: 220px; /* Push content when sidebar is open */
 }
+
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.popup-content {
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 </style>
