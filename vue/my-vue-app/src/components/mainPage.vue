@@ -32,6 +32,7 @@ function closePopup() {
 const allMediaItems = ref([]); // Store all media items
 const mediaItems = ref([]);
 const selectedMedia = ref(null);
+const formattedDate = ref(''); // Store the formatted date for the input field
 const sortOption = ref('date'); // Default sort option
 
 // Fetch media items from the backend
@@ -61,7 +62,15 @@ function updateMediaItems(filteredItems) {
 async function updateMediaDetails() {
   try {
     // Convert the formatted date back to a valid ISO string
-    selectedMedia.value.date = new Date(formattedDate).toISOString();
+    if (formattedDate.value) {
+      const parsedDate = new Date(formattedDate.value);
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error('Invalid date format');
+      }
+      selectedMedia.value.date = parsedDate.toISOString();
+    } else {
+      selectedMedia.value.date = null; // Set to null if no date is provided
+    }
 
     const response = await axios.patch(`http://localhost:3000/api/media/${selectedMedia.value._id}`, selectedMedia.value);
     if (response.data.success) {
@@ -90,6 +99,7 @@ async function openMediaDetails(media) {
     if (response.data.success) {
       // Update the selected media item with the updated data from the backend
       selectedMedia.value = response.data.mediaItem;
+      formattedDate.value = new Date(selectedMedia.value.date).toISOString().split('T')[0]; // Format the date for the input field
 
       // Update the corresponding item in the mediaItems array
       const index = mediaItems.value.findIndex((item) => item._id === media._id);
@@ -149,7 +159,9 @@ onMounted(() => {
       </div>
 
       <ul>
+        
         <li><a href="#home">🏠 Home</a></li>
+        <li><a href="#All">All</a></li>
         <li><a href="#videos">📼 Videos</a></li>
         <li><a href="#audio">🎧 Audio</a></li>
         <li><a href="#gallery">🖼️ Gallery</a></li>
@@ -246,6 +258,7 @@ onMounted(() => {
               <label>
                 Category:
                 <select v-model="selectedMedia.category">
+                  <option value="General">General</option>
                   <option value="videos">Videos</option>
                   <option value="audio">Audio</option>
                   <option value="gallery">Gallery</option>
@@ -255,6 +268,13 @@ onMounted(() => {
               <label>
                 Date:
                 <input type="date" v-model="formattedDate" />
+              </label>
+              <label>
+                Clicks:
+                <p></p> 
+              </label>
+              <label>
+                <button @click.prevent="deleteMedia(selectedMedia._id)">Delete</button>
               </label>
               <button type="submit">Save</button>
             </form>

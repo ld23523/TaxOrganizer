@@ -93,6 +93,17 @@ app.patch('/api/media/:id', async (req, res) => {
   const updates = req.body; // Expect updated fields in the request body
 
   try {
+    // Validate the date
+    if (updates.date) {
+      const parsedDate = new Date(updates.date);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ success: false, message: 'Invalid date format.' });
+      }
+      updates.date = parsedDate; // Set date to current date if not provided
+    } else {
+      updates.date = null;
+    }
+
     const mediaItem = await Media.findByIdAndUpdate(id, updates, { new: true });
 
     if (!mediaItem) {
