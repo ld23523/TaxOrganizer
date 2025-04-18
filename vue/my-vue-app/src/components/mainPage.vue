@@ -159,6 +159,7 @@ onMounted(() => {
           <li><a @click.prevent="handleClick('home')">🏠 Home</a></li>
           <li><a @click.prevent="handleClick('videos')">📼 Videos</a></li>
           <li><a @click.prevent="handleClick('audio')">🎧 Audio</a></li>
+          <li><a @click.prevent="handleClick('document')">📝 Document</a></li>
           <li><a @click.prevent="handleClick('gallery')">🖼️ Gallery</a></li>
           <li><a @click.prevent="handleClick('contact')">📬 Contact</a></li>
     </ul>
