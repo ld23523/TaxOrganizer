@@ -270,8 +270,7 @@ onMounted(() => {
                 <input type="date" v-model="formattedDate" />
               </label>
               <label>
-                Clicks:
-                <p></p> 
+                Clicks: {{ selectedMedia.clicks }}
               </label>
               <label>
                 <button @click.prevent="deleteMedia(selectedMedia._id)">Delete</button>
