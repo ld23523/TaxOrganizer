@@ -1,5 +1,5 @@
 <template>
-    <div class>
+    <div>
       <input 
         type="text" 
         class="search-input" 
@@ -44,27 +44,24 @@
 </script>
 
 <style scoped>
-.search-container {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
+
 
 .search-input {
-  flex: 1;
-  width: 80%;
+  flex: 2;
+  width: 70%;
   padding: 10px;
-  margin-right: 5px;
+  margin-right: 10px;
   border: 1px solid #ddd;
-  border-radius: 5px 0 0 5px;
-  font-size: 16px;
+  border-radius: 5px;
+  font-size: 14px;
 }
 
 button {
+  flex: 2;
   background-color: #1abc9c;
   color: white;
   border: none;
-  border-radius: 0 5px 5px 0;
+  border-radius: 5px;
   padding: 10px 20px;
   cursor: pointer;
 }

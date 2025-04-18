@@ -32,6 +32,7 @@ function closePopup() {
 const allMediaItems = ref([]); // Store all media items
 const mediaItems = ref([]);
 const selectedMedia = ref(null);
+const sortOption = ref('date'); // Default sort option
 
 // Fetch media items from the backend
 async function fetchMediaItems() {
@@ -39,8 +40,17 @@ async function fetchMediaItems() {
     const response = await axios.get('http://localhost:3000/api/media'); // Replace with your backend URL
     allMediaItems.value = response.data; // Assign the fetched data to the mediaItems array
     mediaItems.value = response.data; // Initialize mediaItems with all items
+    sortMediaItems(); // Sort the items after fetching
   } catch (error) {
     console.error('Error fetching media items:', error);
+  }
+}
+
+function sortMediaItems() {
+  if (sortOption.value === 'date') {
+    mediaItems.value.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date (newest first)
+  } else if (sortOption.value === 'clicks') {
+    mediaItems.value.sort((a, b) => b.clicks - a.clicks); // Sort by clicks (highest first)
   }
 }
 
@@ -151,11 +161,19 @@ onMounted(() => {
     <div class="main-content">
       <!--Header -->
       <header class="header">
+        <div class="pad"></div>
         <div class="search-bar-container">
           <Search 
             :mediaItems="allMediaItems" 
             @update-media="updateMediaItems"  
           />
+        </div>
+        <div class="sort-container">
+          <label for="sort">Sort By:</label>
+          <select id="sort" v-model="sortOption" @change="sortMediaItems">
+            <option value="date">Date</option>
+            <option value="clicks">Clicks/Views</option>
+          </select>
         </div>
       </header>
 
@@ -261,15 +279,44 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 40px;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .search-bar-container {
-  flex: 1;
-  margin-right: 20px;
+  flex: 4;
+  margin-right: 0px;
   align-items: center;
+}
+
+.pad {
+  flex: 1;
+}
+
+.sort-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-start;
+  gap: 10px;
+
+}
+
+.sort-container label {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.sort-container select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
 }
 
 .dropdown {
@@ -361,8 +408,8 @@ onMounted(() => {
 
 .media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjusts to fit the screen */
-  gap: 20px; /* Space between items */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjusts to fit the screen */
+  gap: 50px; /* Space between items */
   justify-content: center;
   padding: 20px;
   width: 95%;

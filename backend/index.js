@@ -106,6 +106,7 @@ app.patch('/api/media/:id', async (req, res) => {
   }
 });
 
+
 // Route to create folders
 app.post('/api/folders', async (req, res) => {
   const { folderName, icon } = req.body; // Accept an optional icon for the folder

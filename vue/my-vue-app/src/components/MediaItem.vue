@@ -21,8 +21,8 @@
   
   <style scoped>
   .media-item {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: 110%;
     border-radius: 12px;
     background-color: #f9f9f9;
     display: flex;
