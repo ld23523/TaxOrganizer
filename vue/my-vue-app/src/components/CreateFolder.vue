@@ -36,6 +36,8 @@
     data() {
       return {
         folderName: '',
+        icon: '',
+        category: '',
         message: '',
       };
     },
@@ -46,7 +48,13 @@
           return;
         }
         try {
-          const response = await axios.post('http://localhost:3000/api/folders', { folderName: this.folderName });
+          const response = await axios.post('http://localhost:3000/api/folders', { 
+            folderName: this.folderName,
+            icon: this.icon || '/icons/folder-icon.png',
+            category: this.category,
+            date: this.date || new Date().toISOString(), 
+          });
+
           this.message = response.data.message;
           this.$emit('folder-created', response.data.folder); // Emit the created folder data to the parent component
         } catch (err) {
