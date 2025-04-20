@@ -17,6 +17,7 @@
       <label>
         Category:
         <select v-model="category">
+          <option value="">Select a Category</option>
           <option value="videos">Videos</option>
           <option value="audio">Audio</option>
           <option value="gallery">Gallery</option>
@@ -42,7 +43,7 @@ export default {
       file: null,
       name: '',
       icon: '',
-      category: 'documents',
+      category: '',
       date: '',
       message: '',
     };

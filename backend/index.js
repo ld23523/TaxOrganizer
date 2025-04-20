@@ -56,27 +56,30 @@ const Media = mongoose.model('Media', mediaSchema);
 // Route to upload files
 app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
-    const { folder } = req.body;
+    const { name, icon, category, date, folder } = req.body;
 
     // Determine the category based on the file type
-    let category = '';
+    let fileCategory = category || '';
     if (req.file.mimetype.includes('video')) {
-      category = 'videos';
+      fileCategory = 'videos';
     } else if (req.file.mimetype.includes('audio')) {
-      category = 'audio';
+      fileCategory = 'audio';
     } else if (req.file.mimetype.includes('image')) {
-      category = 'gallery';
+      fileCategory = 'gallery';
     } else if (req.file.mimetype.includes('pdf') || req.file.mimetype.includes('document')) {
-      category = 'documents';
+      fileCategory = 'documents';
     }
 
+//date: date ? new Date(date) : new Date(), // Set date to current date if not provided
+//       name: name || req.file.originalname,
+
     const file = new Media({
-      name: req.file.originalname,
+      name: name || req.file.originalname,
       type: req.file.mimetype,
       path: `/uploads/${req.file.filename}`, // Store the file path
       folder: folder || 'root',
-      category, // Set the category based on the file type
-      date: new Date(),
+      category: fileCategory, // Set the category based on the file type
+      date: date ? new Date(date) : new Date(), // Set date to current date if not provided
       clicks: 0, // Default number of clicks is 0
       icon: req.file.mimetype.includes('image') ? '/icons/image-icon.png' : '/icons/file-icon.png', // Default icon based on file type
     });
@@ -120,7 +123,7 @@ app.patch('/api/media/:id', async (req, res) => {
 
 // Route to create folders
 app.post('/api/folders', async (req, res) => {
-  const { folderName, icon } = req.body; // Accept an optional icon for the folder
+  const { folderName, icon, category, date } = req.body; // Accept an optional icon for the folder
   if (!folderName) {
     return res.status(400).json({ success: false, message: 'Folder name is required' });
   }
@@ -139,7 +142,7 @@ app.post('/api/folders', async (req, res) => {
       folder: 'root', // Default parent folder
       icon: icon || '/icons/folder-icon.png', // Default folder icon if not provided
       category: 'folders', // Set category to folders
-      date: new Date(),
+      date: date ? new Date(date) : new Date(), // Set date to current date if not provided
       clicks: 0, // Default number of clicks is 0
     });
 
