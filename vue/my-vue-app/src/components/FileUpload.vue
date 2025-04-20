@@ -4,7 +4,8 @@
     <form @submit.prevent="uploadFile">
       <label>
         File:
-        <input type="file" @change="handleFile" />
+        <input type="file" accept="video/*,audio/*,image/*,.pdf" @change="handleFile" />
+
       </label>
       <label>
         Name:
@@ -21,7 +22,7 @@
           <option value="videos">Videos</option>
           <option value="audio">Audio</option>
           <option value="gallery">Gallery</option>
-          <option value="documents">Documents</option>
+          <option value="document">Documents</option>
         </select>
       </label>
       <label>
