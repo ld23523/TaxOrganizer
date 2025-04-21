@@ -22,7 +22,7 @@
           <option value="videos">Videos</option>
           <option value="audio">Audio</option>
           <option value="gallery">Gallery</option>
-          <option value="document">Documents</option>
+          <option value="documents">Document</option>
         </select>
       </label>
       <label>
