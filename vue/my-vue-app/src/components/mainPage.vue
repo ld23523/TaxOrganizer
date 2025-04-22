@@ -158,6 +158,14 @@ async function openFolder(folderName) {
   await fetchMediaItems(); // Fetch the contents of the folder
 }
 
+function navigateToFolder(index) {
+  const folderPath = currentFolder.value
+    .split('/')
+    .slice(0, index + 1)
+    .join('/');
+  currentFolder.value = folderPath || 'root'; // Default to 'root' if empty
+  fetchMediaItems(); // Fetch media items for the selected folder
+}
 
 
 // Fetch media items when the component is mounted
@@ -237,9 +245,18 @@ onMounted(() => {
       </div>
     </div>
 
-        <!-- Display base on selectionSection, it has default as home-->
-      <div v-if="['home','videos', 'audio', 'documents', 'gallery'].includes(selectedSection)" class="media-grid">
         <h1>{{ selectedSection }}</h1>
+        <div class="breadcrumb">
+          <span v-for="(folder, index) in currentFolder.split('/')" :key="index">
+            <a @click.prevent="navigateToFolder(index)">
+              {{ folder || 'Root' }}
+            </a>
+            <span v-if="index < currentFolder.split('/').length - 1"> / </span>
+          </span>
+        </div>
+        <!-- Display base on selectionSection, it has default as home-->
+        <div v-if="['home','videos', 'audio', 'documents', 'gallery'].includes(selectedSection)" class="media-grid">
+        
         <MediaItem
             v-for="(item, index) in mediaItems.filter(media => selectedSection === 'home' ? true : media.category === selectedSection)"
             :key="index"
@@ -349,6 +366,23 @@ onMounted(() => {
   padding: 0 40px;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.breadcrumb {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #1abc9c;
+}
+
+.breadcrumb a {
+  color: #1abc9c;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+  color: #16a085;
+  text-decoration: underline;
 }
 
 .search-bar-container {
