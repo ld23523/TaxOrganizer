@@ -39,6 +39,7 @@
 import axios from 'axios';
 
 export default {
+  props: ['currentFolder'], // Accept currentFolder as a prop from the parent component
   data() {
     return {
       file: null,
@@ -53,21 +54,27 @@ export default {
     handleFile(event) {
       this.file = event.target.files[0];
     },
+
     async uploadFile() {
       if (!this.file) {
         this.message = 'Please select a file to upload.';
         return;
       }
 
+      console.log('Uploading file to parent folder:', this.currentFolder);
+
       const formData = new FormData();
       formData.append('file', this.file);
+      formData.append('parentFolder', this.currentFolder);
       formData.append('name', this.name);
       formData.append('icon', this.icon);
       formData.append('category', this.category);
       formData.append('date', this.date || new Date().toISOString());
 
       try {
-        const response = await axios.post('http://localhost:3000/api/upload', formData);
+        const response = await axios.post('http://localhost:3000/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         this.message = response.data.message;
         this.$emit('file-uploaded', response.data.file); // Emit the uploaded file data to the parent component
       } catch (err) {

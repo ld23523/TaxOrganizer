@@ -45,7 +45,9 @@ const sortOption = ref('date'); // Default sort option
 // Fetch media items from the backend
 async function fetchMediaItems() {
   try {
-    const response = await axios.get('http://localhost:3000/api/media'); // Replace with your backend URL
+    console.log('Fetching media items for folder:', currentFolder.value); // Debugging
+    const response = await axios.get(`http://localhost:3000/api/media?folder=${currentFolder.value}`);
+    console.log('Media items fetched:', response.data); // Debugging
     allMediaItems.value = response.data; // Assign the fetched data to the mediaItems array
     mediaItems.value = response.data; // Initialize mediaItems with all items
     sortMediaItems(); // Sort the items after fetching
@@ -141,9 +143,22 @@ async function deleteMedia(id) {
   }
 }
 
+// folder functionality
+const currentFolder = ref('root'); // Track the current folder
+
+async function openFolder(folderName) {
+  console.log('Attempting to open folder:', folderName); // Debugging
+  currentFolder.value = folderName; // Update the current folder
+  console.log('Updated Current folder:', currentFolder.value); // Debugging
+  await fetchMediaItems(); // Fetch the contents of the folder
+}
+
+
+
 // Fetch media items when the component is mounted
 onMounted(() => {
   fetchMediaItems();
+
 });
 </script>
 
@@ -203,26 +218,27 @@ onMounted(() => {
     <!-- Upload Popup -->
     <div v-if="popupType === 'upload'" class="popup">
       <div class ="popup-content">
-        <FileUpload @file-uploaded="fetchMediaItems"/>
+        <FileUpload :currentFolder="currentFolder" @file-uploaded="fetchMediaItems"/>
         <button class="close-button" @click="closePopup">Close</button>
       </div>
     </div>
 
     <!-- Create Folder Popup -->
     <div v-if="popupType === 'createFolder'" class="popup">
-        <CreateFolder @folder-created="fetchMediaItems"/>
+      <div class ="popup-content">
+        <CreateFolder :currentFolder="currentFolder" @folder-created="fetchMediaItems"/>
         <button class="close-button" @click="closePopup">Close</button>
+      </div>
     </div>
 
       <router-view />
       
       
-      
+      <h1>Media Manager</h1>
       
 
       <!-- Media grid (Home Section)-->
       <div v-if="selectedSection === 'home'" class="media-grid">
-        <h1>Media Manager</h1>
           <MediaItem
             v-for="(item, index) in mediaItems"
             :key="index"
@@ -231,7 +247,7 @@ onMounted(() => {
             :icon="item.icon"
             :date="new Date(item.date)"
             :category="item.category"
-            @click="openMediaDetails(item)"
+            @click="item.type === 'folder' ? (console.log('Opening folder from grid:', item.folder), openFolder(item.folder))  : openMediaDetails(item)"
           />
       </div>
       <!--Videos Section-->

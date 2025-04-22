@@ -31,13 +31,17 @@
   
   <script>
   import axios from 'axios';
-  
+
   export default {
+    props: ['currentFolder'], // Accept currentFolder as a prop from the parent component
+    
     data() {
       return {
         folderName: '',
+        parentFolder: '',
         icon: '',
         category: '',
+        date: '',
         message: '',
       };
     },
@@ -48,8 +52,10 @@
           return;
         }
         try {
+          console.log('creating folder in: ', this.currentFolder);
           const response = await axios.post('http://localhost:3000/api/folders', { 
             folderName: this.folderName,
+            parentFolder: this.currentFolder || 'root', // Use the currentFolder prop as the parent folder
             icon: this.icon || '/icons/folder-icon.png',
             category: this.category,
             date: this.date || new Date().toISOString(), 

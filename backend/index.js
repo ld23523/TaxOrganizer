@@ -45,6 +45,7 @@ const mediaSchema = new mongoose.Schema({
   type: String, // File type (e.g., image/jpeg, video/mp4) or folder
   path: String, // File path
   folder: String, // parent folder (root or name of the folder)
+  parentFolder: String, // parent folder (root or name of the folder)
   icon: String, // path to the icon for the media or folder
   date: { type: Date, default: Date.now }, // Automatically assign the current date
   clicks: { type: Number, default: 0 }, // Default number of clicks is 0
@@ -56,7 +57,7 @@ const Media = mongoose.model('Media', mediaSchema);
 // Route to upload files
 app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
-    const { name, icon, category, date, folder } = req.body;
+    const { name, icon, category, date, folder, parentFolder } = req.body;
 
     // Determine the category based on the file type
     let fileCategory = category || '';
@@ -73,11 +74,16 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 //date: date ? new Date(date) : new Date(), // Set date to current date if not provided
 //       name: name || req.file.originalname,
 
+    console.log('Parent folder:', parentFolder);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded.' });
+    }
+
     const file = new Media({
       name: name || req.file.originalname,
       type: req.file.mimetype,
       path: `/uploads/${req.file.filename}`, // Store the file path
-      folder: folder || 'root',
+      parentFolder: parentFolder || 'root',
       category: fileCategory, // Set the category based on the file type
       date: date ? new Date(date) : new Date(), // Set date to current date if not provided
       clicks: 0, // Default number of clicks is 0
@@ -123,13 +129,17 @@ app.patch('/api/media/:id', async (req, res) => {
 
 // Route to create folders
 app.post('/api/folders', async (req, res) => {
-  const { folderName, icon, category, date } = req.body; // Accept an optional icon for the folder
+  const { folderName, parentFolder, icon, category, date } = req.body; // Accept an optional icon for the folder
   if (!folderName) {
     return res.status(400).json({ success: false, message: 'Folder name is required' });
   }
 
   try {
     //check if folder already exists
+    const folderPath = parentFolder ? `${parentFolder}/${folderName}` : folderName;
+    console.log('Creating folder with path:', folderPath); // Debugging
+    console.log('Parent folder:', parentFolder); // Debugging
+
     const existingFolder = await Media.findOne({ name: folderName, type: 'folder' });
     if (existingFolder) {
       return res.status(400).json({ success: false, message: 'Folder already exists.' });
@@ -139,7 +149,8 @@ app.post('/api/folders', async (req, res) => {
     const folder = new Media({
       name: folderName,
       type: 'folder',
-      folder: 'root', // Default parent folder
+      folder: folderPath, // Default parent folder
+      parentFolder: parentFolder || 'root', // Set parent folder to root if not provided
       icon: icon || '/icons/folder-icon.png', // Default folder icon if not provided
       category: 'folders', // Set category to folders
       date: date ? new Date(date) : new Date(), // Set date to current date if not provided
@@ -150,6 +161,16 @@ app.post('/api/folders', async (req, res) => {
   res.json({ success: true, message: 'Folder created successfully', folder });
 }catch (err) {
     res.status(500).json({ success: false, message: 'Error creating folder', error: err.message });
+  }
+});
+
+// get all folders
+app.get('/api/folders', async (req, res) => {
+  try {
+    const folders = await Media.find({ type: 'folder' }).select('name folder -_id'); // Fetch all folders
+    res.json({ success: true, folders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching folders', error: err.message });
   }
 });
 
@@ -184,13 +205,26 @@ app.get('/api/search', async (req, res) => {
 
 // Route to fetch media items
 app.get('/api/media', async (req, res) => {
+  const { folder } = req.query; // Get the folder from the query parameters
+  console.log('Fetching media for parent folder:', folder); // Debugging
+
   try {
-    const mediaItems = await Media.find(); // Fetch all media items from the database
+    // Check if the folder exists
+    const existingFolder = await Media.findOne({ folder: folder, type: 'folder' });
+    if (!existingFolder && folder !== 'root') {
+      return res.status(404).json({ success: false, message: 'Folder not found.' });
+    }
+
+    // Fetch media items based on the folder
+    const mediaItems = await Media.find({ parentFolder: folder || 'root' }); // Fetch all media items from the database
+    console.log('Media items found:', mediaItems); // Debugging
     res.json(mediaItems);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Error fetching media items', error: err.message });
   }
 });
+
+
 
 // Route to delete a media item (file or folder)
 app.delete('/api/media/:id', async (req, res) => {

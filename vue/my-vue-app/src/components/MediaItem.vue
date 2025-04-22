@@ -1,5 +1,5 @@
 <template>
-    <div class="media-item" @click="$emit('click', { name, icon, category, date, clicks })">
+    <div class="media-item" @click="$emit('click', { name, icon, category, folder, date, clicks })">
       <div class="icon">
         <img :src="icon" alt="Media Icon" />
       </div>
@@ -14,6 +14,7 @@
     name: String, // Name of the folder or media
     icon: String, // Path to the icon
     category: String, // Category of the media
+    folder: String, // Folder name
     date: Date, // Date of creation or upload
     clicks: Number, // Number of clicks or views
   });
