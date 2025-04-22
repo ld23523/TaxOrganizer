@@ -246,7 +246,7 @@ onMounted(() => {
     </div>
 
         <h1>{{ selectedSection }}</h1>
-        <div class="breadcrumb">
+        <div class="breadcrumb" v-if="selectedSection !== 'contact'">
           <span v-for="(folder, index) in currentFolder.split('/')" :key="index">
             <a @click.prevent="navigateToFolder(index)">
               {{ folder || 'Root' }}
