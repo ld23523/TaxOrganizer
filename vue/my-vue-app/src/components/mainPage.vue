@@ -8,12 +8,17 @@ import MediaItem from './MediaItem.vue';
 import Contact from "./contact.vue";
 import ChatBot from './chatBot.vue';
 
-
-
 const showSidebar = ref(true);
 const showDropdown = ref(false);
 const popupType = ref('');
 const selectedSection = ref('home'); // Default selected section
+const thumbnailIcon = {
+  videos: '/videoIcon.jpg',   
+  documents: '/documentIcon.jpg',
+  audio: '/audioIcon.jpg',
+  gallery: '/imageIcon.jpg'
+  
+};
 
 const handleClick = (section) => {
   
@@ -160,6 +165,7 @@ onMounted(() => {
   fetchMediaItems();
 
 });
+
 </script>
 
 <template>
@@ -184,9 +190,9 @@ onMounted(() => {
       <ul>
         
           <li><a @click.prevent="handleClick('home')">🏠 Home</a></li>
-          <li><a @click.prevent="handleClick('videos')">📼 Videos</a></li>
+          <li><a @click.prevent="handleClick('videos')">📼 Video</a></li>
           <li><a @click.prevent="handleClick('audio')">🎧 Audio</a></li>
-          <li><a @click.prevent="handleClick('document')">📝 Document</a></li>
+          <li><a @click.prevent="handleClick('documents')">📝 Document</a></li>
           <li><a @click.prevent="handleClick('gallery')">🖼️ Gallery</a></li>
           <li><a @click.prevent="handleClick('contact')">📬 Contact</a></li>
 
@@ -231,87 +237,27 @@ onMounted(() => {
       </div>
     </div>
 
-      <router-view />
-      
-      
-      <h1>Media Manager</h1>
-      
-
-      <!-- Media grid (Home Section)-->
-      <div v-if="selectedSection === 'home'" class="media-grid">
-          <MediaItem
-            v-for="(item, index) in mediaItems"
+        <!-- Display base on selectionSection, it has default as home-->
+      <div v-if="['home','videos', 'audio', 'documents', 'gallery'].includes(selectedSection)" class="media-grid">
+        <h1>{{ selectedSection }}</h1>
+        <MediaItem
+            v-for="(item, index) in mediaItems.filter(media => selectedSection === 'home' ? true : media.category === selectedSection)"
             :key="index"
-            :visible ="true"
+            :visible="true"
             :name="item.name"
-            :icon="item.icon"
+            :icon= "thumbnailIcon[item.category]"
             :date="new Date(item.date)"
             :category="item.category"
             @click="item.type === 'folder' ? (console.log('Opening folder from grid:', item.folder), openFolder(item.folder))  : openMediaDetails(item)"
-          />
-      </div>
-      <!--Videos Section-->
-      <div v-if="selectedSection === 'videos'">
-        <h1>Videos</h1>
-        <MediaItem
-          :visible ="true"
-          v-for="(item, index) in mediaItems.filter(media => media.category === 'videos')"
-          :key="index"
-          :name="item.name"
-          :icon="item.icon"
-          :date="new Date(item.date)"
-          :category="item.category"
-          @click="openMediaDetails(item)"
         />
       </div>
-      <!--Audio Section-->
-      <div v-if="selectedSection === 'audio'">
-        <h1>Audio</h1>
-        <MediaItem
-          :visible ="true"
-          v-for="(item, index) in mediaItems.filter(media => media.category === 'audio')"
-          :key="index"
-          :name="item.name"
-          :icon="item.icon"
-          :date="new Date(item.date)"
-          :category="item.category"
-          @click="openMediaDetails(item)"
-        />
-      </div>
-      <ChatBot 
-          :visible="true" />
-      <!--Documents Section-->    
-      <div v-if="selectedSection === 'document'">
-        <h1>Documents</h1>
-        <MediaItem
-          :visible ="true"
-          v-for="(item, index) in mediaItems.filter(media => media.category === 'documents')"
-          :key="index"
-          :name="item.name"
-          :icon="item.icon"
-          :date="new Date(item.date)"
-          :category="item.category"
-          @click="openMediaDetails(item)"
-        />
-      </div>
-      <!--Gallery Section--> 
-      <div v-if="selectedSection === 'gallery'">
-        <h1>Audio</h1>
-        <MediaItem
-          :visible ="true"
-          v-for="(item, index) in mediaItems.filter(media => media.category === 'gallery')"
-          :key="index"
-          :name="item.name"
-          :icon="item.icon"
-          :date="new Date(item.date)"
-          :category="item.category"
-          @click="openMediaDetails(item)"
-        />
-      </div>
+
       <!--Contact Section-->
       <div v-if="selectedSection === 'contact'">
           <Contact :visible="true" />
       </div>
+      <ChatBot 
+          :visible="true" />
 
       
 
@@ -358,10 +304,10 @@ onMounted(() => {
               <label>
                 Category:
                 <select v-model="selectedMedia.category">
-                  <option value="videos">Videos</option>
+                  <option value="video">Video</option>
                   <option value="audio">Audio</option>
                   <option value="gallery">Gallery</option>
-                  <option value="documents">Documents</option>
+                  <option value="documents">Document</option>
                 </select>
               </label>
               <label>
