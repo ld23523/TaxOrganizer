@@ -46,6 +46,7 @@ const mediaItems = ref([]);
 const selectedMedia = ref(null);
 const formattedDate = ref(''); // Store the formatted date for the input field
 const sortOption = ref('date'); // Default sort option
+const folderItemNames = ref([]); // Store folder item names
 
 // Fetch media items from the backend
 async function fetchMediaItems() {
@@ -120,6 +121,12 @@ async function openMediaDetails(media) {
       if (index !== -1) {
         mediaItems.value[index] = response.data.mediaItem;
       }
+      // 👉 If it's a folder, load its contents
+      if (selectedMedia.value.type === 'folder') {
+        folderItemNames.value = await fetchItemNames(selectedMedia.value.folder);
+      } else {
+        folderItemNames.value = [];
+      }
     } else {
       console.error('Failed to update clicks:', response.data.message);
     }
@@ -130,6 +137,7 @@ async function openMediaDetails(media) {
 
 function closeDisplay() {
   selectedMedia.value = null; // Clear the selected media item
+  folderItemNames.value = [];
 }
 
 async function deleteMedia(id) {
@@ -150,12 +158,14 @@ async function deleteMedia(id) {
 
 // folder functionality
 const currentFolder = ref('root'); // Track the current folder
+const folderOptions = ref([]); // Store folder names
 
 async function openFolder(folderName) {
   console.log('Attempting to open folder:', folderName); // Debugging
   currentFolder.value = folderName; // Update the current folder
   console.log('Updated Current folder:', currentFolder.value); // Debugging
   await fetchMediaItems(); // Fetch the contents of the folder
+  closeDisplay(); // Close the media display if open
 }
 
 function navigateToFolder(index) {
@@ -167,11 +177,45 @@ function navigateToFolder(index) {
   fetchMediaItems(); // Fetch media items for the selected folder
 }
 
+async function fetchFolders() {
+  try {
+    const response = await axios.get(`http://localhost:3000/api/media?folder=${currentFolder.value}`);
+    const allMedia = response.data;
+
+    // Filter folders only
+    const foldersOnly = allMedia.filter(item => item.type === 'folder');
+    // Get current media/folder details
+
+    const currentMedia = allMedia.find(item => item.parentFolder === currentFolder.value);
+    // --- 1. Get breadcrumb paths ---
+    const breadcrumbPaths = currentFolder.value.split('/').filter(Boolean);
+    
+
+    // Save to state for dropdown
+    folderOptions.value = foldersOnly;
+  } catch (error) {
+    console.error('Failed to fetch folders:', error);
+  }
+}
+
+async function fetchItemNames(folder) {
+  try {
+    const response = await axios.get(`http://localhost:3000/api/media?folder=${folder}`);
+    const allMedia = response.data;
+    const folderNames = allMedia.map(item => item.name);
+    return folderNames;
+  } catch (error) {
+    console.error('Failed to fetch folder names:', error);
+    return [];
+  }
+}
+
+
 
 // Fetch media items when the component is mounted
 onMounted(() => {
   fetchMediaItems();
-
+  fetchFolders(); // Fetch folders when the component is mounted
 });
 
 </script>
@@ -265,7 +309,7 @@ onMounted(() => {
             :icon= "thumbnailIcon[item.category]"
             :date="new Date(item.date)"
             :category="item.category"
-            @click="item.type === 'folder' ? (console.log('Opening folder from grid:', item.folder), openFolder(item.folder))  : openMediaDetails(item)"
+            @click= openMediaDetails(item)
         />
       </div>
 
@@ -286,8 +330,8 @@ onMounted(() => {
             <template v-if="selectedMedia.type.includes('image')">
               <img :src="`http://localhost:3000${selectedMedia.path}`" alt="Media Preview" />
             </template>
-            <template v-else-if="selectedMedia.type.includes('pdf')">
-              <iframe :src="`http://localhost:3000${selectedMedia.path}`" frameborder="0"></iframe>
+            <template v-else-if="selectedMedia.type.includes('pdf') || selectedMedia.type.includes('doc') || selectedMedia.type.includes('ppt')">
+              <iframe :src="`http://localhost:3000${selectedMedia.path}`" class="doc-frame" frameborder="0"></iframe>
             </template>
             <template v-else-if="selectedMedia.type.includes('video')">
               <video controls>
@@ -300,6 +344,16 @@ onMounted(() => {
                 <source :src="`http://localhost:3000${selectedMedia.path}`" :type="selectedMedia.type" />
                 Your browser does not support the audio tag.
               </audio>
+            </template>
+            <template v-else-if="selectedMedia.type.includes('folder')" class="folder-preview">
+              <div class="media-preview folder">
+                <p><strong>Folder:</strong> {{ selectedMedia.name }}</p>
+                <ul class="folder-contents">
+                  <li v-for="item in folderItemNames" :key="item._id || item">
+                    {{ item.name || item }}
+                  </li>
+                </ul>
+              </div>
             </template>
             <template v-else>
               <p>Preview not available for this file type.</p>
@@ -333,6 +387,26 @@ onMounted(() => {
               </label>
               <label>
                 Clicks: {{ selectedMedia.clicks }}
+              </label>
+              <label>
+                Folder: 
+                <select
+                  id="parentFolder"
+                  v-model="selectedMedia.parentFolder"
+                >
+                  <option value="root">root</option>
+                  <option
+                    v-for="folder in folderOptions"
+                    :key="folder._id"
+                    :value="folder.folder"
+                    :disabled="folder._id === selectedMedia._id" 
+                  >
+                    {{ folder.name }}
+                  </option>
+                </select>
+              </label>
+              <label v-if="selectedMedia.type === 'folder'">
+                <button @click.prevent="openFolder(selectedMedia.folder)">Open Folder</button>  
               </label>
               <label>
                 <button @click.prevent="deleteMedia(selectedMedia._id)">Delete</button>
@@ -507,6 +581,20 @@ onMounted(() => {
   background-color: #f9f9f9;
 }
 
+.media-preview.folder {
+  flex-direction: column;
+  align-items: flex-start; /* aligns items to the left side */
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.folder-contents {
+  margin-top: 10px;
+  padding-left: 20px;
+  list-style-type: disc;
+  font-size: 16px;
+}
+
 .media-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjusts to fit the screen */
@@ -514,6 +602,12 @@ onMounted(() => {
   justify-content: center;
   padding: 20px;
   width: 95%;
+}
+
+.doc-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 .media-preview img,
@@ -530,6 +624,7 @@ onMounted(() => {
 }
 
 /* Media Info Section */
+
 .media-details {
   max-width: 400px;
   margin: 20px auto;
@@ -538,6 +633,9 @@ onMounted(() => {
   border-radius: 8px;
   background-color: #f9f9f9;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  /*Make scrollable*/
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .media-details label {

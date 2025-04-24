@@ -1,5 +1,7 @@
 <template>
-    <div class="media-item" @click="$emit('click', { name, icon, category, folder, date, clicks })">
+    <div class="media-item" 
+      @click="$emit('click', { name, icon, category, folder, date, clicks })"
+    >
       <div class="icon">
         <img :src="icon" alt="Media Icon" />
       </div>
