@@ -13,7 +13,7 @@
       </label>
       <label>
         Icon URL:
-        <input type="text" v-model="icon" placeholder="Icon URL" />
+        <input type="text" v-model="icon" placeholder='/folderIcon.jpg' />
       </label>
       <label>
         Category:

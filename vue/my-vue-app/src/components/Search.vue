@@ -1,13 +1,14 @@
 <template>
-    <div>
+    <div class="search-container">
       <input 
-        type="text" 
-        class="search-input" 
-        v-model="query" 
-        placeholder="Search files or folders" 
-      />
-      <button @click="filterMedia">Search</button>
-    </div>
+      type="text" 
+      class="search-input" 
+      v-model="query" 
+      placeholder="Search files or folders" 
+    />
+    <button class="search-button" @click="filterMedia">Search</button>
+    <button class="clear-button" @click="clearSearch">Clear</button>
+</div>
   </template>
   
   <script>
@@ -39,6 +40,10 @@
        // Emit the filtered results to the parent component
         this.$emit('update-media', filtered);
       },
+      clearSearch() {
+        this.query = ''; // Clear the search input
+        this.$emit('clear-search'); // Emit an event to clear the search in the parent component
+      },
     },
   };
 </script>
@@ -46,28 +51,42 @@
 <style scoped>
 
 
-.search-input {
-  flex: 2;
-  width: 70%;
-  padding: 10px;
-  margin-right: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
 }
 
-button {
-  flex: 2;
-  background-color: #1abc9c;
-  color: white;
+.search-button,
+.clear-button {
+  padding: 10px 16px;
   border: none;
   border-radius: 5px;
-  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.search-button {
+  background-color: #1abc9c;
+  color: white;
 }
 
 .search-button:hover {
   background-color: #16a085;
+  transform: translateY(-1px);
+}
+
+.clear-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.clear-button:hover {
+  background-color: #c0392b;
+  transform: translateY(-1px);
 }
 
 </style>

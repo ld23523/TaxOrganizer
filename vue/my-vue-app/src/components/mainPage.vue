@@ -16,7 +16,8 @@ const thumbnailIcon = {
   videos: '/videoIcon.jpg',   
   documents: '/documentIcon.jpg',
   audio: '/audioIcon.jpg',
-  gallery: '/imageIcon.jpg'
+  gallery: "`http://localhost:3000${selectedMedia.path}`",
+  folder: '/folderIcon.jpg'
   
 };
 
@@ -217,6 +218,7 @@ onMounted(() => {
           <Search 
             :mediaItems="allMediaItems" 
             @update-media="updateMediaItems"  
+            @clear-search="fetchMediaItems"
           />
         </div>
         <div class="sort-container">
@@ -245,7 +247,7 @@ onMounted(() => {
       </div>
     </div>
 
-        <h1>{{ selectedSection }}</h1>
+        <h1>{{ selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1) }}</h1>
         <div class="breadcrumb" v-if="selectedSection !== 'contact'">
           <span v-for="(folder, index) in currentFolder.split('/')" :key="index">
             <a @click.prevent="navigateToFolder(index)">
@@ -262,7 +264,10 @@ onMounted(() => {
             :key="index"
             :visible="true"
             :name="item.name"
-            :icon= "thumbnailIcon[item.category]"
+            :icon="item.type.startsWith('image') && item.path
+                ? `http://localhost:3000${item.path}`
+                : thumbnailIcon[item.category] || thumbnailIcon.folder"
+
             :date="new Date(item.date)"
             :category="item.category"
             @click="item.type === 'folder' ? (console.log('Opening folder from grid:', item.folder), openFolder(item.folder))  : openMediaDetails(item)"
@@ -284,7 +289,7 @@ onMounted(() => {
           <!-- Media Preview -->
           <div class="media-preview">
             <template v-if="selectedMedia.type.includes('image')">
-              <img :src="`http://localhost:3000${selectedMedia.path}`" alt="Media Preview" />
+              <img :src="`http://localhost:3000${selectedMedia.path}`" alt="Uploaded image" style="width: 100%; max-width: 500px;" />
             </template>
             <template v-else-if="selectedMedia.type.includes('pdf')">
               <iframe :src="`http://localhost:3000${selectedMedia.path}`" frameborder="0"></iframe>

@@ -96,6 +96,7 @@ textarea {
   font-size: 15px;
   font-family: inherit;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
 }
 
 input:focus,
